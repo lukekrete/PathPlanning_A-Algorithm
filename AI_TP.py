@@ -11,6 +11,11 @@ def main():
     #print(type(robotArray[0]))
     for robot in robotArray:
         path = Astar(room,robot,rend,rL,rW)
+        print("path for robot({}):{}".format(robot, path))
+    
+    addPoints(room, robotArray, rend)
+    printRoom(room, rL, rW)
+    print("finished.")
 
 def Astar(room,start, goal, rL, rW):
     frontier = PriorityQueue()
@@ -23,35 +28,81 @@ def Astar(room,start, goal, rL, rW):
     while not frontier.empty():
         current = frontier.get()
         if current == goal:
+            print("current is goal:",current)
             break
-        neighbors = getNeighbors(current,rL,rW)
+        neighbors = getNeighbors(current,rL-1,rW-1, room)
         for element in neighbors:
             new_cost = current_cost[current] + cost(current,element)
-            if element not in current_cost or new_cost < current_cost[element]:
+            # print(new_cost)
+            if element not in current_cost or new_cost< current_cost[element]:
                 current_cost[element] = new_cost
                 priority = new_cost + cost(goal,element)
                 frontier.put(element, priority)
                 previous[element] = current
-                
+    room = updateRoom(previous, room)
+    stepsTaken = []
+    # print(previous)
+    # print("previous goal:", previous[goal])
+    for key in previous.keys():
+        # print(key,previous[key])
+        stepsTaken.append(key)
+    return stepsTaken
+
+def updateRoom(previous, room):
+    for key in previous.keys():
+        if(previous[key] is not None):
+            if(len(previous[key]) == 2):
+                node = previous[key]
+                room[node[1]][node[0]] = 'X'
+                print(room)
+    return room
+
+def addPoints(room, robotArray,rend):
+    x = 'A'
+    i = 0
+    for robot in robotArray:
+        room[robot[1]][robot[0]] = "{}".format(chr(ord(x)+i))
+        i+=1
+    room[rend[1]][rend[0]] = "R"
+
 
 def cost(current, nextNode):
-    cost1 = (current[0]**2 - nextNode[0]**2)
-    cost2 = (current[1]**2 - nextNode[0]**2)
+    # print("CURRENT:",current,"nextNode:", nextNode)
+    cost1 = abs(current[0]**2 - nextNode[0]**2)
+    cost2 = abs(current[1]**2 - nextNode[0]**2)
     final_cost = (cost1 + cost2)**0.5
-    return final_cost
+    return float(final_cost)
 
     
-def getNeighbors(current):
+def getNeighbors(current, rL, rW, room):
+    #returns an array of tuples of (ROW x COL)
     neighbors = []
-    if current[0] > 0 and current[1] > 0 and current[1] < rL and current[0] < rW:
+    if current[0] > 0:
+        #can move left, check if space is occupiable
+        if(room[current[1]][current[0]-1]) != 1:
+            neighbors.append((current[0]-1,current[1]))
+    if current[1] > 0:
+        #can move up, check if space is occupiable
         
-        
+        if(room[current[1]-1][current[0]]) != 1:
+            neighbors.append((current[0],current[1]-1))
+    if current[1] < rL:
+        #can move down, check if space is occupiable
+        if(room[current[1]+1][current[0]]) != 1:
+            neighbors.append((current[0],current[1]+1))
+    if current[0] < rW:
+        #can move right, check if space is occupiable
+        if(room[current[1]][current[0]+1]) != 1:
+            neighbors.append((current[0]+1,current[1]))
+
+    return neighbors
     
 def printRoom(room,rL,rW):
     for i in range(rL):
         print()
         for j in range(rW):
             print(room[i][j],end='')
+    print()
 
             
 def getInput(filename):
@@ -83,3 +134,7 @@ def getInput(filename):
             room[i] = row
           
     return rL,rW,numRobots,robotArray,rend,room
+
+
+if __name__ == '__main__':
+    main()
