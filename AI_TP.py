@@ -13,6 +13,7 @@ def main():
         path = Astar(room,robot,rend,rL,rW)
         print("path for robot({}):{}".format(robot, path))
     
+    addPoints(room, robotArray, rend)
     printRoom(room, rL, rW)
     print("finished.")
 
@@ -55,6 +56,15 @@ def updateRoom(previous, room):
                 room[node[1]][node[0]] = 'X'
                 print(room)
     return room
+
+def addPoints(room, robotArray,rend):
+    x = 'A'
+    i = 0
+    for robot in robotArray:
+        room[robot[1]][robot[0]] = "{}".format(chr(ord(x)+i))
+        i+=1
+    room[rend[1]][rend[0]] = "R"
+
 
 def cost(current, nextNode):
     # print("CURRENT:",current,"nextNode:", nextNode)
